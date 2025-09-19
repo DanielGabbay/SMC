@@ -1,0 +1,152 @@
+<div class="min-h-screen bg-base-200 flex flex-col justify-center items-center p-4">
+  @switch (flowState()) {
+    @case ('verifying') {
+      <div class="card w-full max-w-md bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title justify-center text-2xl">אימות הזמנה</h2>
+            <p class="text-center text-base-content/70 mb-4">אנא הזן את מספר תעודת הזהות שלך להמשך.</p>
+            <form (ngSubmit)="verifyId()" class="space-y-4">
+              <div class="form-control w-full">
+                <label for="idNumber" class="label sr-only"><span class="label-text">מספר תעודת זהות</span></label>
+                <input [formControl]="idInput" id="idNumber" type="text" placeholder="מספר תעודת זהות (9 ספרות)" required class="input input-bordered w-full">
+                @if (idInput.invalid && idInput.touched) {
+                  <label class="label">
+                    <span class="label-text-alt text-error">יש להזין מספר זהות תקין בן 9 ספרות.</span>
+                  </label>
+                }
+              </div>
+              <div class="card-actions">
+                <button type="submit" class="btn btn-primary w-full">
+                  אימות
+                </button>
+              </div>
+              @if (verificationError()) {
+                <p class="text-error text-center mt-4">{{ verificationError() }}</p>
+              }
+            </form>
+        </div>
+      </div>
+    }
+    @case ('signing') {
+      @if(booking(); as currentBooking) {
+      <div class="card w-full max-w-2xl bg-base-100 shadow-xl flex flex-col max-h-[calc(100vh-2rem)]">
+        <div class="card-body p-0 flex flex-col flex-1 min-h-0">
+          <!-- Header -->
+          <div class="p-6 border-b border-base-300 flex-shrink-0">
+            <h1 class="card-title text-3xl">אישור הזמנה</h1>
+          </div>
+          
+          <!-- Scrollable Content -->
+          <div class="flex-grow overflow-y-auto p-6 space-y-6">
+            <!-- Booking Summary -->
+            <div class="border border-base-300 rounded-lg p-4">
+              <h2 class="text-xl font-semibold mb-3">סיכום הזמנה</h2>
+              <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                <p><strong>שם:</strong> {{ currentBooking.customer.fullName }}</p>
+                <p><strong>סכום כולל:</strong> ₪{{ currentBooking.totalAmount.toLocaleString() }}</p>
+                <p><strong>צ'ק-אין:</strong> {{ currentBooking.checkIn }}</p>
+                <p><strong>צ'ק-אאוט:</strong> {{ currentBooking.checkOut }}</p>
+              </div>
+            </div>
+    
+            <!-- Agreement -->
+            <div class="space-y-2">
+                <h2 class="text-xl font-semibold">הסכם אירוח</h2>
+                <div class="h-48 overflow-y-auto border border-base-300 rounded-lg p-4 bg-base-200 text-sm">
+                    <p class="font-bold mb-2">תנאים והגבלות:</p>
+                    <ol class="list-decimal list-inside space-y-2">
+                      <li><strong>מדיניות ביטולים:</strong> ביטולים שנעשו בטווח של 14 ימים מההגעה אינם ניתנים להחזר. עבור ביטולים לפני תקופה זו, המקדמה תוחזר בניכוי דמי טיפול.</li>
+                      <li><strong>צ'ק-אין/צ'ק-אאוט:</strong> שעת הצ'ק-אין היא החל מ-15:00 ביום ההגעה. שעת הצ'ק-אאוט היא עד 11:00 ביום העזיבה. צ'ק-אין מוקדם או צ'ק-אאוט מאוחר עשויים להיות זמינים לפי בקשה ובכפוף לחיובים נוספים.</li>
+                      <li><strong>כללי הנכס:</strong> העישון אסור בהחלט בתוך המבנה. אין לערוך מסיבות או התכנסויות גדולות. האורחים אחראים לכל נזק שייגרם לנכס ויחויבו בהתאם.</li>
+                      <li><strong>אחריות:</strong> בעל הנכס אינו אחראי לכל תאונה, פציעה או מחלה המתרחשים בזמן השהייה בנכס או במתקניו.</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- Credit Card for Security -->
+            <div class="space-y-2">
+                <h2 class="text-xl font-semibold">כרטיס אשראי לביטחון</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-3 form-control">
+                        <label for="cc-number" class="label"><span class="label-text">מספר כרטיס</span></label>
+                        <input [formControl]="creditCardNumber" type="text" id="cc-number" placeholder="**** **** **** ****" class="input input-bordered w-full">
+                    </div>
+                    <div class="form-control">
+                        <label for="cc-expiry" class="label"><span class="label-text">תוקף (MM/YY)</span></label>
+                        <input [formControl]="creditCardExpiry" type="text" id="cc-expiry" placeholder="MM/YY" class="input input-bordered w-full">
+                    </div>
+                    <div class="form-control">
+                        <label for="cc-cvv" class="label"><span class="label-text">CVV</span></label>
+                        <input [formControl]="creditCardCvv" type="text" id="cc-cvv" placeholder="123" class="input input-bordered w-full">
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Signature -->
+            <div class="space-y-2">
+              <h2 class="text-xl font-semibold">חתימה</h2>
+              <app-signature-pad (signatureNeeded)="onSignature()"></app-signature-pad>
+            </div>
+          </div>
+            
+          <!-- Footer / Confirmation -->
+          <div class="p-6 border-t border-base-300 bg-base-200 rounded-b-lg flex-shrink-0 space-y-4">
+            <div class="form-control">
+              <label class="label cursor-pointer justify-start gap-4">
+                <input [formControl]="agreementCheck" id="agreement" type="checkbox" class="checkbox checkbox-primary">
+                <span class="label-text">קראתי ואני מסכים/ה לתנאים וההגבלות.</span>
+              </label>
+            </div>
+            <div class="card-actions">
+                <button (click)="confirmAndSign()" [disabled]="!isFormValid() || isSubmitting()" class="btn btn-primary w-full text-lg">
+                  @if(isSubmitting()){
+                      <span class="loading loading-spinner"></span>
+                      מאשר...
+                  } @else {
+                      אישור וחתימה
+                  }
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    }
+    @case ('confirmed') {
+      <div class="card w-full max-w-md bg-base-100 shadow-xl">
+        <div class="card-body items-center text-center">
+            <svg class="h-16 w-16 text-success" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 class="card-title mt-4 text-2xl">ההזמנה אושרה!</h2>
+            <p class="mt-2">תודה! הזמנתך אושרה. עותק של ההסכם החתום הורד למכשירך.</p>
+            <div class="card-actions mt-4">
+                <a routerLink="/" class="btn btn-ghost">חזרה לדף הבית</a>
+            </div>
+        </div>
+      </div>
+    }
+    @case ('already_confirmed') {
+        <div class="card w-full max-w-md bg-base-100 shadow-xl">
+            <div class="card-body items-center text-center">
+                <h2 class="card-title text-2xl">הזמנה זו כבר אושרה</h2>
+                <p class="mt-2">הזמנה זו כבר אושרה ונחתמה.</p>
+                <div class="card-actions mt-4">
+                    <a routerLink="/" class="btn btn-ghost">חזרה לדף הבית</a>
+                </div>
+            </div>
+        </div>
+    }
+    @case ('not_found') {
+      <div class="card w-full max-w-md bg-base-100 shadow-xl">
+        <div class="card-body items-center text-center">
+            <h2 class="card-title text-2xl">הזמנה לא נמצאה</h2>
+            <p class="mt-2">קישור ההזמנה שגוי או שפג תוקפו.</p>
+            <div class="card-actions mt-4">
+                <a routerLink="/" class="btn btn-ghost">חזרה לדף הבית</a>
+            </div>
+        </div>
+      </div>
+    }
+  }
+</div>

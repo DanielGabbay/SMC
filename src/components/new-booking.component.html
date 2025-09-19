@@ -1,0 +1,117 @@
+<!-- Modal Header -->
+<div class="flex-shrink-0 flex justify-between items-center p-4 border-b border-base-300">
+  <h2 class="text-2xl font-bold text-base-content">
+    יצירת הזמנה חדשה
+  </h2>
+  <button type="button" (click)="onCancel()" class="btn btn-sm btn-circle btn-ghost">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+  </button>
+</div>
+
+<form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="flex-grow flex flex-col min-h-0">
+  <!-- Modal Body -->
+  <div class="flex-grow overflow-y-auto p-6 space-y-6">
+    
+    <!-- Customer Details -->
+    <div class="rounded-md border border-base-300">
+      <h3 class="text-lg font-medium text-base-content px-4 py-3 bg-base-200 border-b border-base-300 rounded-t-md">פרטי לקוח</h3>
+      <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control w-full">
+          <label class="label" for="fullName">
+            <span class="label-text">שם מלא</span>
+          </label>
+          <input id="fullName" formControlName="fullName" type="text" required class="input input-bordered w-full">
+        </div>
+        <div class="form-control w-full">
+          <label class="label" for="idNumber">
+            <span class="label-text">מספר תעודת זהות</span>
+          </label>
+          <input id="idNumber" formControlName="idNumber" type="text" required class="input input-bordered w-full">
+        </div>
+        <div class="form-control w-full">
+          <label class="label" for="phone">
+            <span class="label-text">מספר טלפון</span>
+          </label>
+          <input id="phone" formControlName="phone" type="tel" required class="input input-bordered w-full">
+        </div>
+        <div class="form-control w-full">
+          <label class="label" for="email">
+            <span class="label-text">אימייל (אופציונלי)</span>
+          </label>
+          <input id="email" formControlName="email" type="email" class="input input-bordered w-full">
+        </div>
+      </div>
+    </div>
+    
+    <!-- Booking Details -->
+    <div class="rounded-md border border-base-300">
+      <h3 class="text-lg font-medium text-base-content px-4 py-3 bg-base-200 border-b border-base-300 rounded-t-md">פרטי הזמנה</h3>
+      <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="form-control w-full">
+          <label class="label" for="checkIn">
+            <span class="label-text">תאריך כניסה</span>
+          </label>
+          <input id="checkIn" formControlName="checkIn" type="date" required class="input input-bordered w-full">
+        </div>
+        <div class="form-control w-full">
+          <label class="label" for="checkOut">
+            <span class="label-text">תאריך יציאה</span>
+          </label>
+          <input id="checkOut" formControlName="checkOut" type="date" required class="input input-bordered w-full">
+        </div>
+        <div class="form-control w-full">
+          <label class="label" for="adults">
+            <span class="label-text">מבוגרים</span>
+          </label>
+          <input id="adults" formControlName="adults" type="number" required class="input input-bordered w-full">
+        </div>
+        <div class="form-control w-full">
+          <label class="label" for="children">
+            <span class="label-text">ילדים</span>
+          </label>
+          <input id="children" formControlName="children" type="number" required class="input input-bordered w-full">
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment & Notes -->
+    <div class="rounded-md border border-base-300">
+      <h3 class="text-lg font-medium text-base-content px-4 py-3 bg-base-200 border-b border-base-300 rounded-t-md">תשלום והערות</h3>
+      <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="form-control w-full">
+          <label class="label" for="totalAmount">
+            <span class="label-text">סכום כולל (₪)</span>
+          </label>
+          <input id="totalAmount" formControlName="totalAmount" type="number" required class="input input-bordered w-full">
+        </div>
+        <div class="form-control w-full">
+          <label class="label" for="depositPaid">
+            <span class="label-text">מקדמה ששולמה (₪)</span>
+          </label>
+          <input id="depositPaid" formControlName="depositPaid" type="number" required class="input input-bordered w-full">
+        </div>
+          <div class="md:col-span-2 form-control">
+          <label class="label" for="notes">
+            <span class="label-text">הערות (אופציונלי)</span>
+          </label>
+          <textarea id="notes" formControlName="notes" rows="3" class="textarea textarea-bordered w-full"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="flex-shrink-0 flex items-center justify-end space-x-4 space-x-reverse p-4 border-t border-base-300 bg-base-200 rounded-b-lg">
+      <button type="button" (click)="onCancel()" class="btn btn-ghost">
+      ביטול
+    </button>
+    <button type="submit" [disabled]="isSubmitting()" class="btn btn-primary w-40">
+      @if(isSubmitting()){
+        <span class="loading loading-spinner"></span>
+        יוצר...
+      } @else {
+          צור הזמנה
+      }
+    </button>
+  </div>
+</form>

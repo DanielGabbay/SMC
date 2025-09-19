@@ -1,0 +1,126 @@
+<div class="min-h-screen bg-base-200 p-4 sm:p-6 lg:p-8">
+  <div class="container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-base-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+        Developer Tools
+      </h1>
+      <a routerLink="/" class="btn btn-ghost">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+        Back to Dashboard
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+      <!-- Error Log Card -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title">Recent Application Errors</h2>
+          
+          <div class="flex flex-col sm:flex-row gap-4 items-center mt-4">
+            <div class="form-control w-full sm:w-auto">
+              <label class="label" for="maxErrors">
+                <span class="label-text">Errors to store (X)</span>
+              </label>
+              <input type="number" id="maxErrors" [(ngModel)]="newMaxErrors" (change)="updateMaxErrors()" min="1" max="50" class="input input-bordered w-full max-w-xs">
+            </div>
+            <div class="flex-grow"></div>
+            <div class="flex gap-2">
+              <button class="btn btn-warning" (click)="generateTestError()">Generate Test Error</button>
+              <button class="btn btn-error btn-outline" (click)="errorLoggingService.clearErrors()">Clear Log</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="mt-4 space-y-4 max-h-96 overflow-y-auto pr-2">
+            @if (errorLoggingService.errors().length > 0) {
+              @for (error of errorLoggingService.errors(); track error.timestamp) {
+                <div class="collapse collapse-arrow bg-base-200">
+                  <input type="checkbox" /> 
+                  <div class="collapse-title text-md font-medium">
+                    <div class="flex justify-between items-center">
+                      <span class="text-error font-semibold">{{ error.name }}</span>
+                      <span class="text-xs text-base-content/60">{{ error.timestamp | date:'short' }}</span>
+                    </div>
+                    <p class="truncate text-sm mt-1">{{ error.message }}</p>
+                  </div>
+                  <div class="collapse-content bg-base-300"> 
+                    <p class="font-semibold mt-2">Message:</p>
+                    <p class="text-sm">{{ error.message }}</p>
+                    @if (error.stack) {
+                      <p class="font-semibold mt-4">Stack Trace:</p>
+                      <pre class="text-xs whitespace-pre-wrap bg-black text-white p-2 rounded-md mt-1"><code>{{ error.stack }}</code></pre>
+                    }
+                  </div>
+                </div>
+              }
+            } @else {
+              <div class="text-center p-8 bg-base-200 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>
+                <p class="mt-4 text-lg text-base-content/70">No errors have been caught. Great job!</p>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Database Settings Card -->
+      <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+          <h2 class="card-title">Database Settings</h2>
+          <p class="text-sm text-base-content/60">Manage and test your database connection.</p>
+          
+          <div class="mt-4 space-y-4">
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text">Supabase Project URL</span>
+                </label>
+                <input type="text" [value]="supabaseUrl" readonly class="input input-bordered w-full font-mono text-sm">
+                 <label class="label">
+                    <span class="label-text-alt">This value is read from <code class="bg-base-300 rounded px-1">src/supabase.client.ts</code> and cannot be changed here.</span>
+                </label>
+            </div>
+            
+            <div class="card-actions justify-end">
+              <button class="btn btn-primary" (click)="testSupabaseConnection()" [disabled]="connectionStatus().state === 'testing'">
+                 @if (connectionStatus().state === 'testing') {
+                    <span class="loading loading-spinner"></span>
+                 }
+                Test Connection
+              </button>
+            </div>
+          </div>
+          
+          @if (connectionStatus().state !== 'idle') {
+            <div class="mt-4">
+              @switch(connectionStatus().state) {
+                @case('success') {
+                  <div class="alert alert-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>{{ connectionStatus().message }}</span>
+                  </div>
+                }
+                @case('error') {
+                  <div class="alert alert-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <span>{{ connectionStatus().message }}</span>
+                  </div>
+                }
+                 @case('testing') {
+                  <div class="alert alert-info">
+                    <span class="loading loading-spinner loading-sm"></span>
+                    <span>{{ connectionStatus().message }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
