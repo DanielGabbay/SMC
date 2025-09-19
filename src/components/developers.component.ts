@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ErrorLoggingService } from '../services/error-logging.service';
-import { supabase } from '../supabase.client';
+import { supabase, supabaseUrl } from '../supabase.client';
 
 @Component({
   selector: 'app-developers',
@@ -44,6 +44,6 @@ export class DevelopersComponent {
   }
 
   get supabaseUrl(): string {
-      return supabase.supabaseUrl;
+      return supabaseUrl;
   }
 }
